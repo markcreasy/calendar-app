@@ -1,6 +1,3 @@
-// Set header date
-$("#currentDay").text(moment().format("dddd, MMMM Do"));
-
 
 var createTimeBlock = function(hour){
 
@@ -20,6 +17,8 @@ var createTimeBlock = function(hour){
   var toDoP = $("<textarea>")
     .addClass("to-do-text")
     .attr('id', ('hour-' + hour));
+
+  toDoP.text(schedulerData[(hour-9)]);
 
   toDoDiv.append(toDoP);
 
@@ -46,19 +45,61 @@ var createTimeBlock = function(hour){
 }
 
 var createCalendar = function(){
+
+  // get localStorage data
+  storedDate = localStorage.getItem("today");
+  storedCalendarData = localStorage.getItem("calendarData");
+
+  if(storedDate == moment().format("MDYYYY") && storedCalendarData != null){
+
+    // get calendar data from localStorage
+    schedulerData = JSON.parse(storedCalendarData);
+
+  }else{
+
+    // check to see if data is from today, if not - update localStorage date
+    if(storedDate != moment().format("MDYYYY")){
+      // set current day in localStorage
+      localStorage.setItem("today", moment().format("MDYYYY"));
+    }
+
+    // check if user wants to keep old data
+    var keepData = confirm("We found calendar data from a previous day. Would you like to keep that data?");
+
+    // if user does not want to keep old data, clear localStorage
+    if(keepData){
+      schedulerData = JSON.parse(storedCalendarData);
+    }else{
+      // create new calendar data array
+      schedulerData = ["","","","","","","","",""];
+      localStorage.setItem("calendarData",JSON.stringify(schedulerData));
+    }
+
+  }
   // add Timeblocks for calendar
   for(var i=9;i<18;i++){
     createTimeBlock(i);
   }
 }
 
+// storage variable
+var schedulerData = [];
+// Set header date
+var currentDay = moment();
+$("#currentDay").text(currentDay.format("dddd, MMMM Do"));
+// create calendar
+createCalendar();
+
+// setup listeners
 $("#calendar").on("click", "i", function(){
   var textarea = $(this).closest(".time-block").find("textarea");
-  var hourKey = textarea.attr('id');
+  // get hour index based on id
+  var hourKey = parseInt(textarea.attr('id').replace("hour-",""));
+  // adjust hourkey for index
+  hourKey -= 9;
   var text = textarea.val();
 
-  
+  schedulerData[hourKey] = text;
+  localStorage.setItem("calendarData",JSON.stringify(schedulerData));
 
 });
-
-createCalendar();
