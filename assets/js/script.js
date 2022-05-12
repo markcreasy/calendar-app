@@ -55,13 +55,7 @@ var createCalendar = function(){
     // get calendar data from localStorage
     schedulerData = JSON.parse(storedCalendarData);
 
-  }else{
-
-    // check to see if data is from today, if not - update localStorage date
-    if(storedDate != moment().format("MDYYYY")){
-      // set current day in localStorage
-      localStorage.setItem("today", moment().format("MDYYYY"));
-    }
+  }else if(storedDate != moment().format("MDYYYY") && storedCalendarData != null){
 
     // check if user wants to keep old data
     var keepData = confirm("We found calendar data from a previous day. Would you like to keep that data?");
@@ -72,10 +66,18 @@ var createCalendar = function(){
     }else{
       // create new calendar data array
       schedulerData = ["","","","","","","","",""];
-      localStorage.setItem("calendarData",JSON.stringify(schedulerData));
     }
 
+  }else{
+    // storedCalendarData is empty
+    schedulerData = ["","","","","","","","",""];
   }
+
+  // set current day in localStorage
+  localStorage.setItem("today", moment().format("MDYYYY"));
+  // set schedulerData
+  localStorage.setItem("calendarData",JSON.stringify(schedulerData));
+
   // add Timeblocks for calendar
   for(var i=9;i<18;i++){
     createTimeBlock(i);
